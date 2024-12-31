@@ -1,5 +1,6 @@
 const ProductSchema = require("../models/product");
 
+// static GET method without filter
 const getAllProductsStatic = async (req, res, next) => {
   const search = "";
   try {
@@ -46,7 +47,6 @@ const getAllProducts = async (req, res, next) => {
   let selectAttributes;
   if (attribute) {
     selectAttributes = attribute.split(",").join(" ");
-    console.log(attribute);
   }
 
   // filter using regEx
@@ -67,14 +67,24 @@ const getAllProducts = async (req, res, next) => {
     const regEx = /\b(>|>=|=|<=|<)\b/g;
     let filters = numericalFilters.replace(
       regEx,
-      (match) => `-${operatorMap[match]}-`
-    );
-    filters = filters.split(",").join(" ");
+      (match) => `-$${operatorMap[match]}-`
+    )
 
-    queryObject.numericalFilters = filters;
+    // only these two are included because their value is numeric
+    const options = ['price', 'rating']
+
+    filters = filters.split(",").forEach((item) => {
+      const [field, operator, value] = item.split('-')
+      console.log(field, operator, value)
+
+      if(options.includes(field)) {
+        // dynamically create a queryObject property (name of field, eg. price)
+        queryObject[field] = { [operator]: Number(value) }
+      }
+    });
   }
 
-  console.log(queryObject);
+  console.log(queryObject)
 
   // get the querys in the url
   const page = Number(req.query.page) || 1;
@@ -96,3 +106,5 @@ module.exports = {
   getAllProductsStatic,
   getAllProducts,
 };
+
+// stop: 5 4 49

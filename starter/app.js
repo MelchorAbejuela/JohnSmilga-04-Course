@@ -19,8 +19,6 @@ app.get("/", (req, res) => {
 const routes = require("./routes/products");
 app.use("/api/v1/products", routes);
 
-// products route
-
 // if routes does not exist
 app.use(notFoundMiddleware);
 app.use(errorMiddleware);
